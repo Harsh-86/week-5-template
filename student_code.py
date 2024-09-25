@@ -1,0 +1,3 @@
+
+class VersatileDigraph()
+    pass

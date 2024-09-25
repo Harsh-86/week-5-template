@@ -1,0 +1,120 @@
+name: Autograding Tests
+on:
+  push:
+  repository_dispatch:
+permissions:
+  checks: write
+  actions: read
+  contents: read
+jobs:
+  run-autograding-tests:
+    runs-on: ubuntu-latest
+    if: github.actor != 'github-classroom[bot]'
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    - name: test_graph_representation_1
+      id: test_graph_representation_1
+      uses: classroom-resources/autograding-command-grader@v1
+      with:
+        test-name: test_graph_representation_1
+        setup-command: pip install pytest pylint
+        command: pytest test/test_graph_representation_1.py
+        timeout: 10
+        max-score: 10
+    - name: test_graph_representation_2
+      id: test_graph_representation_2
+      uses: classroom-resources/autograding-command-grader@v1
+      with:
+        test-name: test_pylint_warnings
+        setup-command: pip install pytest pylint
+        command: pytest test/test_graph_representation_2.py
+        timeout: 10
+        max-score: 10
+    - name: test_graph_representation_3
+      id: test_graph_representation_3
+      uses: classroom-resources/autograding-command-grader@v1
+      with:
+        test-name: test_graph_representation_3
+        setup-command: pip install pytest pylint
+        command: pytest test/test_graph_representation_3.py
+        timeout: 10
+        max-score: 10
+    - name: test_graph_representation_4
+      id: test_graph_representation_4
+      uses: classroom-resources/autograding-command-grader@v1
+      with:
+        test-name: test_graph_representation_4
+        setup-command: pip install pytest
+        command: pytest test/test_graph_representation_4.py
+        timeout: 10
+        max-score: 10
+    - name: test_graph_representation_5
+      id: test_graph_representation_5
+      uses: classroom-resources/autograding-command-grader@v1
+      with:
+        test-name: test_graph_representation_5
+        setup-command: pip install pytest
+        command: pytest test/test_graph_representation_5.py
+        timeout: 10
+        max-score: 10
+    - name: test_graph_representation_6
+      id: test_graph_representation_6
+      uses: classroom-resources/autograding-command-grader@v1
+      with:
+        test-name: test_graph_representation_6
+        setup-command: pip install pytest
+        command: pytest test/test_graph_representation_6.py
+        timeout: 10
+        max-score: 10
+    - name: test_graph_representation_7
+      id: test_graph_representation_7
+      uses: classroom-resources/autograding-command-grader@v1
+      with:
+        test-name: test_graph_representation_7
+        setup-command: pip install pytest
+        command: pytest test/test_graph_representation_7.py
+        timeout: 10
+        max-score: 10
+    - name: test_graph_representation_8
+      id: test_graph_representation_8
+      uses: classroom-resources/autograding-command-grader@v1
+      with:
+        test-name: test_graph_representation_8
+        setup-command: pip install pytest
+        command: pytest test/test_graph_representation_8.py
+        timeout: 10
+        max-score: 10
+    - name: test_graph_representation_9
+      id: test_graph_representation_9
+      uses: classroom-resources/autograding-command-grader@v1
+      with:
+        test-name: test_graph_representation_9
+        setup-command: pip install pytest
+        command: pytest test/test_graph_representation_9.py
+        timeout: 10
+        max-score: 10
+    - name: test_graph_representation_10
+      id: test_graph_representation_10
+      uses: classroom-resources/autograding-command-grader@v1
+      with:
+        test-name: test_graph_representation_10
+        setup-command: pip install pytest
+        command: pytest test/test_graph_representation_10.py
+        timeout: 10
+        max-score: 10
+    - name: Autograding Reporter
+      uses: classroom-resources/autograding-grading-reporter@v1
+      with:
+        runners: test_graph_representation_1,test_graph_representation_2,test_graph_representation_3,test_graph_representation_4,test_graph_representation_5,test_graph_representation_6,test_graph_representation_7,test_graph_representation_8,test_graph_representation_9,test_graph_representation_10
+      env:
+        TEST_GRAPH_REPRESENTATION_1_RESULTS: ${{ steps.test_graph_representation_1.outputs.result }}
+        TEST_GRAPH_REPRESENTATION_2_RESULTS: ${{ steps.test_graph_representation_2.outputs.result }}
+        TEST_GRAPH_REPRESENTATION_3_RESULTS: ${{ steps.test_graph_representation_3.outputs.result }}
+        TEST_GRAPH_REPRESENTATION_4_RESULTS: ${{ steps.test_graph_representation_4.outputs.result }}
+        TEST_GRAPH_REPRESENTATION_5_RESULTS: ${{ steps.test_graph_representation_5.outputs.result }}
+        TEST_GRAPH_REPRESENTATION_6_RESULTS: ${{ steps.test_graph_representation_6.outputs.result }}
+        TEST_GRAPH_REPRESENTATION_7_RESULTS: ${{ steps.test_graph_representation_7.outputs.result }}
+        TEST_GRAPH_REPRESENTATION_8_RESULTS: ${{ steps.test_graph_representation_8.outputs.result }}
+        TEST_GRAPH_REPRESENTATION_9_RESULTS: ${{ steps.test_graph_representation_9.outputs.result }}
+        TEST_GRAPH_REPRESENTATION_10_RESULTS: ${{ steps.test_graph_representation_10.outputs.result }}
