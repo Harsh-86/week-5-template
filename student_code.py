@@ -121,9 +121,9 @@ class VersatileDigraph:
 # console
 c = VersatileDigraph()
 
-c.add_node("Allentown:66", node_value=66)
-c.add_node("Easton:74", node_value=74)
-c.add_node("Bethlehem:70", node_value=70)
+c.add_node("Allentown", node_value=66)
+c.add_node("Easton", node_value=74)
+c.add_node("Bethlehem", node_value=70)
 c.add_edge("Allentown", "Easton", edge_name="US22E", edge_weight=17)
 c.add_edge("Easton", "Allentown", edge_name="US22W", edge_weight=17)
 c.add_edge("Easton", "Bethlehem", edge_name="Freemansburg", edge_weight=12)
