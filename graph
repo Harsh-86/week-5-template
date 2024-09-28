@@ -1,0 +1,13 @@
+digraph {
+	A [label="A
+Value: 0"]
+	B [label="B
+Value: 0"]
+	C [label="C
+Value: 0"]
+	D [label="D
+Value: 10"]
+	A -> B [label="edge1 (Weight: 5)"]
+	A -> C [label="edge2 (Weight: 3)"]
+	B -> C [label="edge3 (Weight: 2)"]
+}
