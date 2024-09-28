@@ -1,180 +1,135 @@
-import graphviz
+from graphviz import Digraph
 from bokeh.plotting import figure, show
-from bokeh.io import output_notebook
 
 class VersatileDigraph:
-    """Defining a versatile directed graph with nodes and edges"""
+    'Class for versatile digraph implementation'
 
     def __init__(self):
-        self.nodes = {}
-        self.edges = {}
-        self.edge_names = set()  # To store unique edge names
+        self.__node_dict = {}
+        self.__edge_dict = {}
+        self.__graph = Digraph()
 
-    def add_edge(self, start_node_id, end_node_id, start_node_value=0,
-                 end_node_value=0, edge_name=None, edge_weight=1):
-        """Add an edge between two nodes. Add nodes if they don't exist."""
-        if not isinstance(start_node_id, str) or not isinstance(end_node_id, str):
-            raise TypeError("start_node_id and end_node_id must be strings.")
-        
-        if not isinstance(edge_weight, (int, float)):
-            raise TypeError("edge_weight must be a number.")
-        
-        if edge_weight < 0:
-            raise ValueError("Edge weight cannot be negative.")
-        
-        if start_node_id not in self.nodes:
-            self.add_node(start_node_id, start_node_value)
-        if end_node_id not in self.nodes:
-            self.add_node(end_node_id, end_node_value)
+    def add_edge(self, start_node_id, end_node_id, node_value=5, **varargs):
+        'For adding the edges to the graph'
 
-        # If the edge name is provided and already exists, raise a ValueError
-        if edge_name is not None and edge_name in self.edge_names:
-            raise ValueError(f"Edge with name '{edge_name}' already exists.")
+        if start_node_id not in self.__node_dict or end_node_id not in self.__node_dict:
+            raise ValueError("Both start and end nodes must exist in the graph")
 
-        # Add the edge with its weight and name
-        if start_node_id not in self.edges:
-            self.edges[start_node_id] = {}
+        if "edge_name" not in varargs:
+            raise KeyError("Please provide an 'edge_name' in the varargs")
 
-        if edge_name is None:
-            edge_name = f"edge_{start_node_id}_{end_node_id}"
+        count = sum(1 for i, j in self.__edge_dict.items() if i[0] == start_node_id and varargs["edge_name"] == j["edge_name"])
+        if count >= 1:
+            raise ValueError("Please provide another name to the edge")
 
-        self.edges[start_node_id][end_node_id] = (edge_weight, edge_name)
+        self.__edge_dict[(start_node_id, end_node_id)] = varargs
 
-        # Add the edge name to the set of edge names
-        self.edge_names.add(edge_name)
-
-    def add_node(self, node_id, node_value=0):
-        """Add a node with an optional value to the graph."""
-        if not isinstance(node_id, str):
-            raise TypeError("node_id must be a string.")
-        
-        if not isinstance(node_value, (int, float)):
-            raise TypeError("node_value must be a number.")
-        
-        if node_id not in self.nodes:
-            self.nodes[node_id] = node_value
-        else:
-            raise ValueError(f"Node with id '{node_id}' already exists.")
+    def add_node(self, node_id, node_value=1):
+        'For adding node'
+        if not isinstance(node_value, int):
+            raise TypeError("Node value must be an integer")
+        self.__node_dict[node_id] = node_value
 
     def get_nodes(self):
-        """Return a list of nodes in the graph."""
-        return list(self.nodes.keys())
+        'For retrieving the nodes'
+        return list(self.__node_dict.keys())
 
-    def get_edge_weight(self, start_node_id, end_node_id):
-        """Return the edge weight given a start and end node."""
-        if start_node_id in self.edges and end_node_id in self.edges[start_node_id]:
-            edge_weight, _ = self.edges[start_node_id][end_node_id]
-            return edge_weight
-        raise KeyError(f"No edge exists between '{start_node_id}' and '{end_node_id}'.")
+    def get_edge_wt(self, start_node_id, end_node_id):
+        'For getting the edge weights'
+        if (start_node_id, end_node_id) not in self.__edge_dict:
+            raise KeyError(f"No edge between {start_node_id} and {end_node_id}")
+        return self.__edge_dict[(start_node_id, end_node_id)]["edge_weight"]
 
     def get_node_value(self, node_id):
-        """Return the value of the given node."""
-        if node_id not in self.nodes:
-            raise KeyError(f"Node '{node_id}' does not exist.")
-        return self.nodes.get(node_id)
-
-    def predecessors(self, node_id):
-        """Return a list of nodes that immediately precede the given node."""
-        if node_id not in self.nodes:
-            raise KeyError(f"Node '{node_id}' does not exist.")
-        return [start_node for start_node, connections in self.edges.items() if node_id in connections]
-
-    def successors(self, node_id):
-        """Return a list of nodes that immediately succeed the given node."""
-        if node_id not in self.nodes:
-            raise KeyError(f"Node '{node_id}' does not exist.")
-        if node_id in self.edges:
-            return list(self.edges[node_id].keys())
-        return []
-
-    def successor_on_edge(self, node_id, edge_name):
-        """Return the successor of the given node on the specified edge name."""
-        if node_id not in self.edges:
-            raise KeyError(f"Node '{node_id}' does not exist.")
-        for end_node, (_, name) in self.edges[node_id].items():
-            if name == edge_name:
-                return end_node
-        raise KeyError(f"No successor found on edge '{edge_name}' for node '{node_id}'.")
-
-    def in_degree(self, node_id):
-        """Return the number of edges that lead to the given node."""
-        return len(self.predecessors(node_id))
-
-    def out_degree(self, node_id):
-        """Return the number of edges that lead from the given node."""
-        if node_id in self.edges:
-            return len(self.edges[node_id])
-        return 0
-
-    def plot_graph(self, filename="graph"):
-        """Generate and display a graph plot using Graphviz."""
-        dot = graphviz.Digraph()
-
-        # Add nodes
-        for node in self.nodes:
-            dot.node(node, label=f"{node}\nValue: {self.nodes[node]}")
-
-        # Add edges
-        for start_node, connections in self.edges.items():
-            for end_node, (weight, name) in connections.items():
-                dot.edge(start_node, end_node, label=f"{name} (Weight: {weight})")
-        
-        dot.render(filename, view=True)
-        
-    def plot_edge_weights(self):
-        """Generate a bar graph showing the weight of each edge using Bokeh."""
-        output_notebook()  # Enable rendering in Jupyter Notebooks
-
-        edge_names = []
-        edge_weights = []
-
-        for start_node, connections in self.edges.items():
-            for end_node, (weight, name) in connections.items():
-                edge_names.append(f"{start_node}->{end_node} ({name})")
-                edge_weights.append(weight)
-
-        # Create a bar plot
-        p = figure(x_range=edge_names, title="Edge Weights", plot_height=350, plot_width=800)
-        p.vbar(x=edge_names, top=edge_weights, width=0.9)
-
-        p.xgrid.grid_line_color = None
-        p.y_range.start = 0
-        p.xaxis.major_label_orientation = 1.2  # Rotate labels for better readability
-
-        show(p)
+        'For getting the node values'
+        if node_id not in self.__node_dict:
+            raise KeyError(f"No such node with ID {node_id}")
+        return self.__node_dict[node_id]
 
     def print_graph(self):
-        """Print all nodes and edges."""
-        print("Nodes in the graph:")
-        for node_id, node_value in self.nodes.items():
-            print(f"Node {node_id} with value {node_value}")
+        'For printing the edges of the graph'
+        for i, j in self.__edge_dict.items():
+            if j == {}:
+                print(f"An edge from {i[0]} to {i[1]} with no weight and name")
+            else:
+                print(f"An edge from {i[0]} to {i[1]}, weight={j['edge_weight']}, name={j['edge_name']}")
 
-        print("\nEdges in the graph:")
-        for start_node, connections in self.edges.items():
-            for end_node, (weight, name) in connections.items():
-                print(f"Edge from {start_node} to {end_node} with weight {weight} and name {name}")
+    def predecessors(self, node_id):
+        'Gives list of nodes that immediately precede the given node'
+        return [i[0] for i in self.__edge_dict if i[1] == node_id]
 
+    def successors(self, node_id):
+        'Gives list of nodes that immediately succeed that node'
+        return [i[1] for i in self.__edge_dict if i[0] == node_id]
 
-# Example usage:
-Graph = VersatileDigraph()
-Graph.add_edge("A", "B", edge_weight=5, edge_name="edge1")
-Graph.add_edge("A", "C", edge_weight=3, edge_name="edge2")
-Graph.add_edge("B", "C", edge_weight=2, edge_name="edge3")
-Graph.add_node("D", node_value=10)
+    def successor_on_edge(self, start_node_id, edge_name):
+        'Gives the end node, given start node and the edge name'
+        for i, j in self.__edge_dict.items():
+            if i[0] == start_node_id and j["edge_name"] == edge_name:
+                headnode = i[1]
+                break
+        else:
+            raise KeyError(f"No edge with name {edge_name} starting from {start_node_id}")
+        return headnode
 
-Graph.print_graph()
+    def indegree(self, node_id):
+        'Gives the number of edges that lead to the given node'
+        return len([i[0] for i in self.__edge_dict if i[1] == node_id])
 
-print("Nodes in graph:", Graph.get_nodes())
-print("Weight of edge A -> B:", Graph.get_edge_weight("A", "B"))
-print("Value of node D:", Graph.get_node_value("D"))
-print("Predecessors of C:", Graph.predecessors("C"))
-print("Successors of A:", Graph.successors("A"))
-print("Successor of A on edge 'edge1':", Graph.successor_on_edge("A", "edge1"))
-print("Indegree of C:", Graph.in_degree("C"))
-print("Outdegree of A:", Graph.out_degree("A"))
+    def outdegree(self, node_id):
+        'Gives the number of edges that lead from the given node'
+        return len([i[1] for i in self.__edge_dict if i[0] == node_id])
 
-# Plot the graph using Graphviz
-Graph.plot_graph()
+    def plot(self):
+        'To make the plot of the object'
+        for i, j in self.__edge_dict.items():
+            self.__graph.edge(str(i[0]), str(i[1]), label=f"{j['edge_name']}:{j['edge_weight']}")
+        self.__graph.view()
 
-# Plot edge weights using Bokeh
-Graph.plot_edge_weights()
+    def edge_weight_plot(self):
+        'Bar graph for showing the weight of each edge'
+        x_list = []
+        top = []
+        width = 0.5
+
+        # Use a set to store unique edge names
+        unique_edge_names = set()
+
+        for i, j in self.__edge_dict.items():
+            edge_name = j["edge_name"]
+
+            # Check if the edge name is already in the set
+            if edge_name in unique_edge_names:
+                # Modify the edge name to make it unique
+                suffix = 1
+                while f"{edge_name}_{suffix}" in unique_edge_names:
+                    suffix += 1
+                edge_name = f"{edge_name}_{suffix}"
+
+            # Add the modified edge name to the set
+            unique_edge_names.add(edge_name)
+
+            x_list.append(str(edge_name))
+            top.append(j["edge_weight"])
+
+        graph = figure(x_range=x_list, title="Bokeh Bar Graph")
+        graph.xaxis.axis_label = "Edge Names"
+        graph.yaxis.axis_label = "Edge Weights"
+        graph.vbar(x=x_list, top=top, width=width)  # Plotting the graph
+        show(graph)  # Displaying the graph
+
+# console
+c = VersatileDigraph()
+
+c.add_node("Allentown:66", node_value=66)
+c.add_node("Easton:74", node_value=74)
+c.add_node("Bethlehem:70", node_value=70)
+c.add_edge("Allentown", "Easton", edge_name="US22E", edge_weight=17)
+c.add_edge("Easton", "Allentown", edge_name="US22W", edge_weight=17)
+c.add_edge("Easton", "Bethlehem", edge_name="Freemansburg", edge_weight=12)
+c.add_edge("Bethlehem", "Easton", edge_name="US22E", edge_weight=12)
+c.add_edge("Bethlehem", "Allentown", edge_name="Hanover", edge_weight=6)
+c.add_edge("Allentown", "Bethlehem", edge_name="Hanover", edge_weight=6)
+
+c.plot()
+c.edge_weight_plot()

@@ -1,0 +1,8 @@
+digraph {
+	Allentown -> Easton [label="US22E:17"]
+	Easton -> Allentown [label="US22W:17"]
+	Easton -> Bethlehem [label="Freemansburg:12"]
+	Bethlehem -> Easton [label="US22E:12"]
+	Bethlehem -> Allentown [label="Hanover:6"]
+	Allentown -> Bethlehem [label="Hanover:6"]
+}
